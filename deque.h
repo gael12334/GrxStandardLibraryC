@@ -94,6 +94,55 @@ void grxAllocDeque(grxDeque* _deque, int8_t _bOrF) {
 /// <param name="_bOrF">: Position of allocation of memory.</param>
 /// <returns>Returns the success of the operation.</returns>
 int8_t grxShrinkDeque(grxDeque* _deque, int8_t _bOrF) {
+	if (_deque->_elemAlloc == 0U)
+		return 0;
+
+	else if (_deque->_elemCount == 1U) {
+		free(_deque->_data);
+		_deque->_data = NULL;
+		_deque->_elemAlloc = 0U;
+		_deque->_elemCount = 0U;
+		_deque->_frontIndex = 0U;
+		_deque->_backIndex = 0U;
+		return 1;
+	}
+
+	else {
+		if (_bOrF == grxAllocDequeFront) {
+			if (grxDequeAllocSize == (_deque->_frontIndex + 1)) {
+				void** dequeArray = (void**)calloc(_deque->_elemAlloc - grxDequeAllocSize, sizeof(void*));
+
+				uint32_t _dequeAllocatedBytes = _deque->_elemAlloc - grxDequeAllocSize;
+				memcpy_s(dequeArray, _dequeAllocatedBytes, &_deque->_data[_deque->_frontIndex + 1], _dequeAllocatedBytes);
+
+				_deque->_backIndex -= grxDequeAllocSize;
+				_deque->_frontIndex = 0U;
+				_deque->_elemCount--;
+				_deque->_elemAlloc -= grxDequeAllocSize;
+			}
+			else {
+				_deque->_frontIndex++;
+				_deque->_elemCount--;
+			}
+		}
+		
+		else {
+			if (grxDequeAllocSize == (_deque->_elemAlloc - _deque->_backIndex - 1)) {
+				void** dequeArray = (void**)calloc(_deque->_elemAlloc - grxDequeAllocSize, sizeof(void*));
+
+				uint32_t _dequeAllocatedBytes = _deque->_elemAlloc - grxDequeAllocSize;
+				memcpy_s(dequeArray, _dequeAllocatedBytes, _deque->_data, _dequeAllocatedBytes);
+
+				_deque->_backIndex--;
+				_deque->_elemCount--;
+				_deque->_elemAlloc -= grxDequeAllocSize;
+			}
+			else {
+				_deque->_backIndex--;
+				_deque->_elemCount--;
+			}
+		}
+	}
 
 	return 0;
 }
@@ -108,10 +157,25 @@ void grxAddDequeBack(grxDeque* _deque, void* _value) {
 	_deque->_data[_deque->_backIndex] = _value;
 }
 
+void grxRemoveDequeFront(grxDeque* _deque) {
+	grxShrinkDeque(_deque, grxAllocDequeFront);
+}
 
+void grxRemoveDequeBack(grxDeque* _deque) {
+	grxShrinkDeque(_deque, grxAllocDequeBack);
+}
 
+void* grxGetDequeValue(const grxDeque* _deque, uint32_t _index) {
+	return _deque->_data[_deque->_frontIndex + _index];
+}
 
+void* grxSetDequeValue(grxDeque* _deque, uint32_t _index, void* _value) {
+	_deque->_data[_deque->_frontIndex + _index] = _value;
+}
 
+uint32_t grxGetDequeCount(const grxDeque* _deque) {
+	return _deque->_elemCount;
+}
 
 #undef grxDequeAllocSize
 #undef grxAllocDequeFront 
