@@ -10,10 +10,10 @@
 #define grxAllocDequeBack 1
 
 typedef struct grxDeque {
-	void**		_data;			///<summary> Deque's data array.			</summary>
-	uint32_t	_elemCount;		///<summary> Deque's element count.			</summary>
-	uint32_t	_elemAlloc;		///<summary> Deque's allocated element count.		</summary>
-	uint32_t	_frontIndex;		///<summary> Deque's front element index.		</summary>
+	void**		_data;			///<summary> Deque's data array.				</summary>
+	uint32_t	_elemCount;		///<summary> Deque's element count.				</summary>
+	uint32_t	_elemAlloc;		///<summary> Deque's allocated element count.	</summary>
+	uint32_t	_frontIndex;	///<summary> Deque's front element index.		</summary>
 	uint32_t	_backIndex;		///<summary> Deque's back element index.		</summary>
 } grxDeque;
 
@@ -51,8 +51,8 @@ void grxAllocDeque(grxDeque* _deque, int8_t _bOrF) {
 		if (_deque->_frontIndex == 0) {
 			void** dequeArray = (void**)calloc(_deque->_elemAlloc + grxDequeAllocSize, sizeof(void*));
 			
-			uint32_t _dequeAllocatedBytes = sizeof(void*) * _deque->_elemCount;
-			memcpy_s(&dequeArray[grxDequeAllocSize - 1], _dequeAllocatedBytes, _deque->_data, _dequeAllocatedBytes);
+			uint32_t _dequeAllocatedBytes = sizeof(void*) * _deque->_elemAlloc;
+			memcpy_s(&dequeArray[grxDequeAllocSize], _dequeAllocatedBytes, _deque->_data, _dequeAllocatedBytes);
 			
 			free(_deque->_data);
 			_deque->_data = dequeArray;
@@ -71,7 +71,7 @@ void grxAllocDeque(grxDeque* _deque, int8_t _bOrF) {
 		if (_deque->_backIndex == (_deque->_elemAlloc - 1)) {
 			void** dequeArray = (void**)calloc(_deque->_elemAlloc + grxDequeAllocSize, sizeof(void*));
 
-			uint32_t _dequeAllocatedBytes = sizeof(void*) * _deque->_elemCount;
+			uint32_t _dequeAllocatedBytes = sizeof(void*) * _deque->_elemAlloc;
 			memcpy_s(dequeArray, _dequeAllocatedBytes, _deque->_data, _dequeAllocatedBytes);
 
 			free(_deque->_data);
@@ -101,7 +101,7 @@ int8_t grxShrinkDeque(grxDeque* _deque, int8_t _bOrF) {
 		free(_deque->_data);
 		_deque->_data = NULL;
 		_deque->_elemAlloc = 0U;
-		_deque->_elemCount = 0U;
+		_deque->_elemCount = 1U;
 		_deque->_frontIndex = 0U;
 		_deque->_backIndex = 0U;
 		return 1;
@@ -114,6 +114,8 @@ int8_t grxShrinkDeque(grxDeque* _deque, int8_t _bOrF) {
 
 				uint32_t _dequeAllocatedBytes = _deque->_elemAlloc - grxDequeAllocSize;
 				memcpy_s(dequeArray, _dequeAllocatedBytes, &_deque->_data[_deque->_frontIndex + 1], _dequeAllocatedBytes);
+				free(_deque->_data);
+				_deque->_data = dequeArray;
 
 				_deque->_backIndex -= grxDequeAllocSize;
 				_deque->_frontIndex = 0U;
@@ -132,6 +134,8 @@ int8_t grxShrinkDeque(grxDeque* _deque, int8_t _bOrF) {
 
 				uint32_t _dequeAllocatedBytes = _deque->_elemAlloc - grxDequeAllocSize;
 				memcpy_s(dequeArray, _dequeAllocatedBytes, _deque->_data, _dequeAllocatedBytes);
+				free(_deque->_data);
+				_deque->_data = dequeArray;
 
 				_deque->_backIndex--;
 				_deque->_elemCount--;
