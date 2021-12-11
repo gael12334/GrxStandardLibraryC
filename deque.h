@@ -169,7 +169,7 @@ void* grxGetDequeValue(const grxDeque* _deque, uint32_t _index) {
 	return _deque->_data[_deque->_frontIndex + _index];
 }
 
-void* grxSetDequeValue(grxDeque* _deque, uint32_t _index, void* _value) {
+void grxSetDequeValue(grxDeque* _deque, uint32_t _index, void* _value) {
 	_deque->_data[_deque->_frontIndex + _index] = _value;
 }
 
