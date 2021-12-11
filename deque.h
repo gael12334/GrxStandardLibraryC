@@ -10,10 +10,10 @@
 #define grxAllocDequeBack 1
 
 typedef struct grxDeque {
-	void**		_data;			///<summary> Deque's data array.				</summary>
-	uint32_t	_elemCount;		///<summary> Deque's element count.				</summary>
-	uint32_t	_elemAlloc;		///<summary> Deque's allocated element count.	</summary>
-	uint32_t	_frontIndex;	///<summary> Deque's front element index.		</summary>
+	void**		_data;			///<summary> Deque's data array.			</summary>
+	uint32_t	_elemCount;		///<summary> Deque's element count.			</summary>
+	uint32_t	_elemAlloc;		///<summary> Deque's allocated element count.		</summary>
+	uint32_t	_frontIndex;		///<summary> Deque's front element index.		</summary>
 	uint32_t	_backIndex;		///<summary> Deque's back element index.		</summary>
 } grxDeque;
 
