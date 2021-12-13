@@ -181,6 +181,22 @@ uint32_t grxGetDequeCount(const grxDeque* _deque) {
 	return _deque->_elemCount;
 }
 
+int8_t grxDequeSwap(grxDeque* _deque, uint32_t _posA, uint32_t _posB) {
+	_posA += _deque->_frontIndex;
+	_posB += _deque->_frontIndex;
+
+	if (_posA >= _deque->_backIndex)
+		return 0Ui8;
+
+	if (_posB >= _deque->_backIndex)
+		return 0Ui8;
+
+	void* valueA = _deque->_data[_posA];
+	_deque->_data[_posA] = _deque->_data[_posB];
+	_deque->_data[_posB] = valueA;
+	return 1Ui8;
+}
+
 #undef grxDequeAllocSize
 #undef grxAllocDequeFront 
 #undef grxAllocDequeBack 
