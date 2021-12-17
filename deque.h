@@ -42,7 +42,7 @@ void grxAllocDeque(grxDeque* _deque, int8_t _bOrF) {
 	if (_deque->_elemAlloc == 0U) {
 		_deque->_data		= (void**)calloc(grxDequeAllocSize, sizeof(void*));
 		_deque->_elemAlloc	= grxDequeAllocSize;
-		_deque->_elemCount	= 0U;
+		_deque->_elemCount	= 1U;
 		_deque->_frontIndex	= (_bOrF == grxAllocDequeFront) ? grxDequeAllocSize - 1 : 0;
 		_deque->_backIndex	= (_bOrF == grxAllocDequeFront) ? grxDequeAllocSize - 1 : 0;
 	}
@@ -101,7 +101,6 @@ int8_t grxShrinkDeque(grxDeque* _deque, int8_t _bOrF) {
 		free(_deque->_data);
 		_deque->_data = NULL;
 		_deque->_elemAlloc = 0U;
-		_deque->_elemCount = 1U;
 		_deque->_frontIndex = 0U;
 		_deque->_backIndex = 0U;
 		return 1;
@@ -185,16 +184,28 @@ int8_t grxDequeSwap(grxDeque* _deque, uint32_t _posA, uint32_t _posB) {
 	_posA += _deque->_frontIndex;
 	_posB += _deque->_frontIndex;
 
-	if (_posA >= _deque->_backIndex)
+	if (_posA > _deque->_backIndex)
 		return 0Ui8;
 
-	if (_posB >= _deque->_backIndex)
+	if (_posB > _deque->_backIndex)
 		return 0Ui8;
 
 	void* valueA = _deque->_data[_posA];
 	_deque->_data[_posA] = _deque->_data[_posB];
 	_deque->_data[_posB] = valueA;
 	return 1Ui8;
+}
+
+uint32_t grxSeekDequeValue(grxDeque* _deque, void* _value, int8_t* _failed) {
+	for (uint32_t i = _deque->_frontIndex, m = _deque->_frontIndex + _deque->_elemCount; i < m; i++) {
+		if (_deque->_data[i] == _value) {
+			*_failed = 0U;
+			return i;
+		}
+	}
+
+	*_failed = 1U;
+	return 0U;
 }
 
 #undef grxDequeAllocSize
