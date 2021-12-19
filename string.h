@@ -11,7 +11,7 @@
 #define grxAllocStringBack 1
 
 typedef struct grxString {
-	char*		  _data;       ///<summary> String's data array.				</summary>
+	char*		_data;       ///<summary> String's data array.				</summary>
 	uint32_t	_elemCount;  ///<summary> String's element count.			</summary>
 	uint32_t	_elemAlloc;  ///<summary> String's allocated element count.	</summary>
 	uint32_t	_frontIndex; ///<summary> String's front element index.		</summary>
@@ -25,7 +25,7 @@ void grxFreeString(grxString** _strPtr) {
 }
 
 uint32_t grxGetStringCount(const grxString* _string) {
-	return _string->_elemCount;
+	return _string->_elemCount; // + 1
 }
 
 int8_t grxStringSwap(grxString* _string, uint32_t _posA, uint32_t _posB) {
@@ -422,7 +422,7 @@ void grxStringJoinFront(grxString* _string, const grxString* _toJoin) {
 
 grxString* grxGetSubString(grxString* _string, uint32_t _fromIndex, uint32_t _toIndex) {
 	grxString* sub = grxCreateString();
-	uint32_t strCount = grxGetStringCount(_string);
+	uint32_t strCount = grxGetStringCount(_string) + 1;
 
 	if ((_fromIndex >= strCount) || (_toIndex >= strCount))
 		return NULL;
@@ -434,6 +434,124 @@ grxString* grxGetSubString(grxString* _string, uint32_t _fromIndex, uint32_t _to
 	}
 
 	return sub;
+}
+
+grxString* grxScanString(grxString* _string, const char _chs[], uint32_t* _startTo, char* _caughtCh) {
+	uint32_t strCount = grxGetStringCount(_string);
+	uint32_t chsCount = strlen(_chs) + 1;
+	grxString* result = grxCreateString();
+	char selected;
+
+	for (uint32_t i = *_startTo; i < strCount; i++) {
+		selected = grxGetStringValue(_string, i);
+
+		for (uint32_t j = 0U; j < chsCount; j++) {
+			if (selected == _chs[j]) {
+				*_startTo = i + 1U;
+				*_caughtCh = _chs[j];
+				return result;
+			}
+		}
+		
+		grxAddStringBack(result, selected);
+	}
+
+	*_startTo = strCount;
+	return result;
+}
+
+void grxInverseScanString(grxString* _string, const char _chs[], uint32_t* _startTo, char* _caughtOp) {
+	uint32_t strCount = grxGetStringCount(_string);
+	uint32_t chsCount = strlen(_chs) + 1;
+	char selected;
+	int8_t chFound = 0U;
+
+	for (uint32_t i = *_startTo; i < strCount; i++) {
+		selected = grxGetStringValue(_string, i);
+
+		for (uint32_t j = 0U; j < chsCount; j++) {
+			if (selected == _chs[j]) {
+				chFound = 1U;
+				break;
+			}
+		}
+
+		if (chFound == 0U) {
+			*_startTo = i;
+			*_caughtOp = selected;
+			return;
+		}
+		else
+			chFound = 0U;
+	}
+}
+
+int8_t grxAreStringEquals(grxString* _stringA, grxString* _stringB) {
+	uint32_t strACount = grxGetStringCount(_stringA);
+	uint32_t strBCount = grxGetStringCount(_stringB);
+
+	if (strACount != strBCount)
+		return 0U;
+
+	char chA;
+	char chB;
+
+	for (uint32_t i = 0U; i < strACount; i++) {
+		chA = grxGetStringValue(_stringA, i);
+		chB = grxGetStringValue(_stringB, i);
+		
+		if (chA != chB)
+			return 0U;
+	}
+
+	return 1U;
+}
+
+int8_t grxAreStringEqualsNative(grxString* _stringA, const char _text[]) {
+	uint32_t strACount = grxGetStringCount(_stringA);
+	uint32_t strBCount = strlen(_text);
+
+	if (strACount != strBCount)
+		return 0U;
+
+	char chA;
+	char chB;
+
+	for (uint32_t i = 0U; i < strACount; i++) {
+		chA = grxGetStringValue(_stringA, i);
+		chB = _text[i];
+
+		if (chA != chB)
+			return 0U;
+	}
+
+	return 1U;
+}
+
+int8_t grxIsStringInteger(grxString* _string) {
+	uint32_t strCount = grxGetStringCount(_string) + 1;
+	if (grxIsStringEmpty(_string))
+		return 0U;
+
+	char selected = grxGetStringValue(_string, 0U);
+
+	for (uint32_t i = (selected == '-'); i < strCount; i++) {
+		selected = grxGetStringValue(_string, i);
+		if (selected == '\0')
+			continue;
+
+		if ((selected < '0') || (selected > '9'))
+			return 0U;
+	}
+
+	return 1U;
+}
+
+int32_t grxHashString(grxString* _string) {
+	uint32_t result = 0U;
+	for (uint32_t i = 0U, m = grxGetStringCount(_string) + 1; i < m; i++)
+		result += grxGetStringValue(_string, i); 
+	return result;
 }
 
 #undef grxStringAllocSize
